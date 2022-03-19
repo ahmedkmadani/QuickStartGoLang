@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"time"
@@ -99,7 +100,25 @@ func main() {
 
 	// gin.DisableConsoleColor()
 	gin.ForceConsoleColor()
-	r := gin.Default()
+	// r := gin.Default()
+	r := gin.New()
+
+	r.Use(gin.LoggerWithFormatter(func(param gin.LogFormatterParams) string {
+
+		//Custom log format
+		return fmt.Sprintf("%s - [%s] \"%s %s %s %d %s \"%s\" %s\"\n",
+			param.ClientIP,
+			param.TimeStamp.Format(time.RFC1123),
+			param.Method,
+			param.Path,
+			param.Request.Proto,
+			param.StatusCode,
+			param.Latency,
+			param.Request.UserAgent(),
+			param.ErrorMessage,
+		)
+	}))
+
 	s := &http.Server{
 		Addr:           ":8080",
 		Handler:        r,
@@ -107,7 +126,8 @@ func main() {
 		WriteTimeout:   10 * time.Second,
 		MaxHeaderBytes: 1 << 20,
 	}
-	// r := gin.New()
+
+	r.Use(gin.Recovery())
 	r.GET("/ping", func(ctx *gin.Context) {
 		ctx.JSON(http.StatusOK, gin.H{
 			"message": "ping",
