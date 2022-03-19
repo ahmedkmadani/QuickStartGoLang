@@ -41,6 +41,11 @@ type StructD struct {
 	FiledD string `form:"field_x"`
 }
 
+type PersonUri struct {
+	ID   string `uri:"id" binding:"required,uuid"`
+	Name string `uri:"name" binding:"required"`
+}
+
 func GetDataB(ctx *gin.Context) {
 	var b StructB
 	ctx.Bind(&b)
@@ -96,6 +101,15 @@ func main() {
 		ctx.JSON(http.StatusOK, gin.H{
 			"message": "ping",
 		})
+	})
+
+	r.GET("/:name/:id", func(ctx *gin.Context) {
+		var personUri PersonUri
+		if err := ctx.ShouldBindUri(&personUri); err != nil {
+			ctx.JSON(400, gin.H{"msg": err})
+			return
+		}
+		ctx.JSON(200, gin.H{"name": personUri.Name, "uuid": personUri.ID})
 	})
 
 	// using AsciiJSON
