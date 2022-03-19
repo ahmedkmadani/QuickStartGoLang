@@ -96,7 +96,18 @@ func getperson(ctx *gin.Context) {
 }
 
 func main() {
+
+	// gin.DisableConsoleColor()
+	gin.ForceConsoleColor()
 	r := gin.Default()
+	s := &http.Server{
+		Addr:           ":8080",
+		Handler:        r,
+		ReadTimeout:    10 * time.Second,
+		WriteTimeout:   10 * time.Second,
+		MaxHeaderBytes: 1 << 20,
+	}
+	// r := gin.New()
 	r.GET("/ping", func(ctx *gin.Context) {
 		ctx.JSON(http.StatusOK, gin.H{
 			"message": "ping",
@@ -133,5 +144,39 @@ func main() {
 	//BIND QUERY STRING OR POST DATA
 	r.GET("/getperson", getperson)
 
-	r.Run("localhost:8080")
+	// t, err := loadTemplate()
+
+	// if err != nil {
+	// 	panic(err)
+	// }
+
+	// r.SetHTMLTemplate(t)
+
+	// r.GET("/", func(ctx *gin.Context) {
+	// 	ctx.HTML(http.StatusOK, "/html/index.tmpl", nil)
+	// })
+
+	// r.Run("localhost:8080")
+	s.ListenAndServe()
 }
+
+// func loadTemplate() (*template.Template, error) {
+// 	t := template.New("")
+// 	for name, file := range Assets.Files {
+// 		if file.IsDir() || !strings.HasSuffix(name, ".tmpl") {
+// 			continue
+// 		}
+
+// 		h, err := ioutil.ReadAll(file)
+// 		if err != nil {
+// 			return nil, err
+// 		}
+
+// 		t, err = t.New(name).Parse(string(h))
+
+// 		if err != nil {
+// 			return nil, err
+// 		}
+// 	}
+// 	return t, nil
+// }
